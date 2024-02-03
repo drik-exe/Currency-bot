@@ -57,9 +57,13 @@ async def alfabank(currency: str, date: str):
     date = date.strftime("%d.%m.%Y")
     
     request = requests.get(
-        f"https://developerhub.alfabank.by:8273/partner/1.0.1/public/nationalRates?date={str(date)}"
+        f"https://developerhub.alfabank.by:8273/partner/1.0.1/public/rates?date={str(date)}"
     )
     response = request.json()
+    
+    for rate in response["rates"]:
+        if rate["sellIso"] == currency and rate["buyIso"] == "BYN":
+            return {"sellRate" : f"{rate["sellRate"]}", "buyRate" : f"{rate["buyRate"]}"}
     return response
     
 
