@@ -1,5 +1,5 @@
 import datetime
-
+import matplotlib.pyplot as plt
 import requests
 from config import TOKEN, APIData
 from telegram_bot_calendar import LSTEP, DetailedTelegramCalendar
@@ -53,6 +53,13 @@ def choose_currency(message):
         markup.add(
             "Курс на текущий день", "Выбрать другой банк", "Выбрать другую валюту"
         )
+    elif api_data.bank == "Беларуcбанк":
+        markup.add(
+            "Курс на текущий день",
+            "Курс на выбранный день",
+            "Выбрать другой банк",
+            "Выбрать другую валюту",
+        )
     else:
         markup.add(
             "Курс на текущий день",
@@ -93,6 +100,13 @@ def choose_currency_for_now(message):
         else:
             bot.send_message(
                 message.chat.id, f"Нет данных на данный момент", reply_markup=markup
+            )
+    elif api_data.bank == "Беларуcбанк":
+        markup.add(
+                "Курс на текущий день",
+                "Курс на выбранный день",
+                "Выбрать другой банк",
+                "Выбрать другую валюту",
             )
     else:
         markup.add(
@@ -172,12 +186,21 @@ def cal(c):
     elif result:
         api_data.date = result
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(
-                    'Курс на текущий день',
-                    'Курс на выбранный день',
-                    'Собрать статистику',
-                    'Выбрать другой банк',
-                    'Выбрать другую валюту')
+        if api_data.bank == "Беларуcбанк":
+            markup.add(
+            "Курс на текущий день",
+            "Курс на выбранный день",
+            "Выбрать другой банк",
+            "Выбрать другую валюту",
+        )
+        else:
+            markup.add(
+            "Курс на текущий день",
+            "Курс на выбранный день",
+            "Собрать статистику",
+            "Выбрать другой банк",
+            "Выбрать другую валюту",
+        )
 
         if api_data.bank == "Национальный банк":
             data = requests.get(
@@ -203,6 +226,24 @@ def cal(c):
                                  reply_markup=markup)
             else:
                 bot.send_message(c.message.chat.id, f"Нет данных на данный момент", reply_markup=markup)
+
+
+@bot.message_handler(func=lambda message: message.text == "Собрать статистику")
+def choose_data(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(
+        'Курс на текущий день',
+        'Курс на выбранный день',
+        'Собрать статистику',
+        'Выбрать другой банк',
+        'Выбрать другую валюту')
+    data = requests.get(
+                f'http://127.0.0.1:8000/statistic/')
+    plt.plot([i for i in range(1, 33)], data.json())
+    plt.savefig("foo.png")
+    photo = open('foo.png', 'rb')
+    bot.send_photo(message.chat.id, photo, reply_markup=markup)
+    bot.register_next_step_handler(message, choose_currency_for_now)
 
 
 
