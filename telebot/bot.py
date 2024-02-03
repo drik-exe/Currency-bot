@@ -44,7 +44,10 @@ def choose_currency(message):
     else:
         api_data.bank = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(
+    if api_data.bank == 'Альфа банк':
+        markup.add('Курс на текущий день', 'Выбрать другой банк', 'Выбрать другую валюту')
+    else:
+        markup.add(
             'Курс на текущий день',
             'Курс на выбранный день',
             'Собрать статистику',
@@ -59,7 +62,21 @@ def choose_currency(message):
 @bot.message_handler(func=lambda message: message.text == 'Курс на текущий день')
 def choose_currency_for_now(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(
+    if api_data.bank == 'Альфа банк':
+        markup.add('Курс на текущий день', 'Выбрать другой банк', 'Выбрать другую валюту')
+        data = requests.get(
+            f'http://127.0.0.1:8000/alfabank/{api_data.currency}/{str(datetime.datetime.now())[:10]}')
+        bot.send_message(message.chat.id,
+                         f"{api_data.bank} - {api_data.currency} на {str(datetime.datetime.now())[:10]}")
+        if len(data.json()) > 0:
+            print(data.json())
+            bot.send_message(message.chat.id, f"Курс продажи: {data.json()['sellRate']}")
+            bot.send_message(message.chat.id, f"Курс покупки: {data.json()['buyRate']}",
+                             reply_markup=markup)
+        else:
+            bot.send_message(message.chat.id, f"Нет данных на данный момент", reply_markup=markup)
+    else:
+        markup.add(
             'Курс на текущий день',
             'Курс на выбранный день',
             'Собрать статистику',
@@ -79,18 +96,6 @@ def choose_currency_for_now(message):
         if len(data.json()) > 0:
             bot.send_message(message.chat.id, f"Курс продажи: {data.json()[0][api_data.currency + 'CARD_in']}")
             bot.send_message(message.chat.id, f"Курс покупки: {data.json()[0][api_data.currency + 'CARD_out']}", reply_markup=markup)
-        else:
-            bot.send_message(message.chat.id, f"Нет данных на данный момент", reply_markup=markup)
-    else:
-        data = requests.get(
-            f'http://127.0.0.1:8000/alfabank/{api_data.currency}/{str(datetime.datetime.now())[:10]}')
-        bot.send_message(message.chat.id,
-                         f"{api_data.bank} - {api_data.currency} на {str(datetime.datetime.now())[:10]}")
-        if len(data.json()) > 0:
-            print(data.json())
-            bot.send_message(message.chat.id, f"Курс продажи: {data.json()['sellRate']}")
-            bot.send_message(message.chat.id, f"Курс покупки: {data.json()['buyRate']}",
-                             reply_markup=markup)
         else:
             bot.send_message(message.chat.id, f"Нет данных на данный момент", reply_markup=markup)
 
