@@ -51,23 +51,21 @@ async def belarus_bank(currency: str, date: str):
     else:
         return {"message": f"No data available for {currency} on {date}"}
 
-@app.get("/alfabank/{currency}/{date}")
+@app.get("/alfabank/{currency}")
 async def alfabank(currency: str, date: str):
     date = datetime.strptime(date, "%Y-%m-%d")
 
     date = date.strftime("%d.%m.%Y")
     
     request = requests.get(
-        f"https://developerhub.alfabank.by:8273/partner/1.0.1/public/rates?date={str(date)}"
+        f"https://developerhub.alfabank.by:8273/partner/1.0.1/public/rates"
     )
     response = request.json()
     
     for rate in response["rates"]:
         if rate["sellIso"] == currency and rate["buyIso"] == "BYN":
             return {"sellRate" : f"{rate['sellRate']}", "buyRate" : f"{rate['buyRate']}"}
-    return response
+    return {"Error" : "Нету такой валюты"}
     
-
-
 if __name__ == "__main__":
     uvicorn.run(app=app, host="0.0.0.0", port=8000)
