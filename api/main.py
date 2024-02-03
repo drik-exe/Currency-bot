@@ -55,11 +55,13 @@ async def belarus_bank(currency: str, date: str):
 
 
 @app.get("/alfabank/{currenct}/{date}")
-async def alfabank():
+async def alfabank(currency: str, date: str):
     request = requests.get(
         "https://developerhub.alfabank.by:8273/partner/1.0.1/public/nationalRates"
     )
     response = request.json
+    print(response)
+    return response
     
 
 
