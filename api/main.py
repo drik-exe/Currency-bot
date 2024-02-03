@@ -63,7 +63,7 @@ async def alfabank(currency: str, date: str):
     
     for rate in response["rates"]:
         if rate["sellIso"] == currency and rate["buyIso"] == "BYN":
-            return {"sellRate" : f"{rate["sellRate"]}", "buyRate" : f"{rate["buyRate"]}"}
+            return {"sellRate" : f"{rate['sellRate']}", "buyRate" : f"{rate['buyRate']}"}
     return response
     
 
