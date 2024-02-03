@@ -44,6 +44,7 @@ def choose_bank(message):
 
 @bot.message_handler(func=lambda message: message.text in ('USD', 'EUR', 'GBP', 'JPY', 'RUB', 'CNY', 'Национальный банк', 'Альфа банк', 'Беларусбанк'))
 def choose_currency(message):
+    print(message.text)
     if len(message.text) <= 4:
         api_data.currency = message.text
     else:
@@ -53,7 +54,7 @@ def choose_currency(message):
         markup.add(
             "Курс на текущий день", "Выбрать другой банк", "Выбрать другую валюту"
         )
-    elif api_data.bank == "Беларуcбанк":
+    elif api_data.bank == "Беларусбанк":
         markup.add(
             "Курс на текущий день",
             "Курс на выбранный день",
