@@ -35,5 +35,3 @@ def current_exchange_rate(message):
 @bot.message_handler(func=lambda message: message.text == 'Курс на выбранный день')
 def custom_exchange_rate(message):
     bot.send_message(message.chat.id, "Вы выбрали действие 'Курс на выбранный день'")
-
-
