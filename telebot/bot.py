@@ -19,10 +19,9 @@ def start(message):
 def choose_bank(message):
     BANK = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add('USD', 'EUR', 'GBP', 'JPY')
+    markup.add('USD', 'EUR', 'GBP', 'JPY')gi
     bot.send_message(message.chat.id, f"Ты выбрал {message.text}."
                                       " Теперь выбери нужную тебе валюту ниже.:", reply_markup=markup)
-
 
 @bot.message_handler(func=lambda message: message.text == 'Выбрать другую валюту')
 def choose_currency(message):
