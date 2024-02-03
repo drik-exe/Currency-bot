@@ -38,8 +38,9 @@ def choose_bank(message):
         markup.add('USD', 'EUR', 'CNY', 'RUB')
     else:
         markup.add('USD', 'EUR', 'GBP', 'JPY')
+
     bot.send_message(message.chat.id, f"Ты выбрал {message.text}."
-                                      " Теперь выбери нужную тебе валюту ниже.", reply_markup=markup)
+                                          " Теперь выбери нужную тебе валюту ниже.", reply_markup=markup)
 
 
 @bot.message_handler(func=lambda message: message.text in ('USD', 'EUR', 'GBP', 'JPY', 'RUB', 'CNY', 'Национальный банк', 'Альфа банк', 'Беларусбанк'))
@@ -70,11 +71,15 @@ def choose_currency(message):
             "Выбрать другую валюту",
         )
 
-    bot.send_message(
-        message.chat.id,
-        f"Выбранная валюта: {api_data.currency}." f"  Выбранный банк: {api_data.bank}.",
-        reply_markup=markup,
-    )
+    if api_data.bank is None:
+        bot.send_message(message.chat.id, "Выберите банк")
+        bot.register_next_step_handler(message, choose_bank)
+    else:
+        bot.send_message(
+            message.chat.id,
+            f"Выбранная валюта: {api_data.currency}." f"  Выбранный банк: {api_data.bank}.",
+            reply_markup=markup,
+        )
 
 
 @bot.message_handler(func=lambda message: message.text == "Курс на текущий день")
@@ -251,6 +256,11 @@ def choose_data(message):
     bot.send_photo(message.chat.id, photo, reply_markup=markup)
     bot.register_next_step_handler(message, choose_currency_for_now)
 
+
+# @bot.message_handler(func=lambda message: message.text not in ('Национальный банк', 'Альфа банк', 'Беларусбанк'))
+# def everything(message):
+#     if api_data.bank is None:
+#         bot.register_next_step_handler(message, choose_bank)
 
 
 @bot.message_handler(func=lambda message: message.text not in ('USD', 'EUR', 'GBP', 'JPY', 'RUB', 'CNY', 'Национальный банк', 'Альфа банк', 'Беларусбанк'))
