@@ -3,3 +3,5 @@ fastapi==0.109.0
 requests==2.31.0
 uvicorn==0.25.0
 python-telegram-bot-calendar==1.0.5
+black==24.1.1
+isort==5.13.2
