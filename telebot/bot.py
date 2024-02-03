@@ -239,8 +239,13 @@ def choose_data(message):
         'Выбрать другой банк',
         'Выбрать другую валюту')
     data = requests.get(
-                f'http://127.0.0.1:8000/statistic/')
-    plt.plot([i for i in range(1, 33)], data.json())
+                f'http://127.0.0.1:8000/statistic/{api_data.currency}')
+    print(data.json())
+    plt.plot([i for i in range(1, 33)], data.json()['cur_officialrate_list'], color='purple', marker='o', markersize=7)
+    plt.xlabel('Дни')
+    plt.ylabel(f'Курс {api_data.currency}')
+    plt.title(f'Статистика за последние 30 дней')
+
     plt.savefig("foo.png")
     photo = open('foo.png', 'rb')
     bot.send_photo(message.chat.id, photo, reply_markup=markup)

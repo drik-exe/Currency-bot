@@ -101,7 +101,6 @@ async def statistic(currency: str):
         "one_month_ago_formatted": one_month_ago_formatted,
         "today_formatted": today_formatted
     }
-    
     return result
 
 
