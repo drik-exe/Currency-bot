@@ -79,16 +79,19 @@ async def statistic():
     today = datetime.now()
     one_month_ago = today - timedelta(days=calendar.monthrange(today.year, today.month-1)[1])
 
-    today_formatted = today.strftime("%d-%m-%Y")
-    one_month_ago_formatted = one_month_ago.strftime("%d-%m-%Y")
+    today_formatted = today.strftime("%m-%d-%Y")
+    one_month_ago_formatted = one_month_ago.strftime("%m-%d-%Y")
     
-    print(today_formatted,one_month_ago_formatted)
+
     print(f"https://api.nbrb.by/exrates/rates/dynamics/508?startdate={one_month_ago_formatted}&enddate={today_formatted}")
     
-    request = requests.get(f"https://api.nbrb.by/exrates/rates/dynamics/508?startdate={today_formatted}&enddate={one_month_ago_formatted}")
+    request = requests.get(f"https://api.nbrb.by/exrates/rates/dynamics/508?startdate={one_month_ago_formatted}&enddate={today_formatted}")
     response = request.json()
-    print(response)
-    return(response)
+    cur_officialrate_list = []
+
+    for item in response:
+        cur_officialrate_list.append(item['Cur_OfficialRate'])
+    return(cur_officialrate_list)
 
 
 if __name__ == "__main__":
