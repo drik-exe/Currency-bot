@@ -1,5 +1,3 @@
-from telebot import types
-import telebot
 from config import TOKEN
 from config import APIData
 bot = telebot.TeleBot(TOKEN)
@@ -7,16 +5,23 @@ bot = telebot.TeleBot(TOKEN)
 api_data = APIData()
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=["start"])
 def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add('Национальный банк', 'Альфа банк', 'Беларусьбанк')
+    markup.add("Национальный банк", "Альфа банк", "Беларусьбанк")
 
-    bot.send_message(message.chat.id, "Привет, чтобы воспользоваться функционалом "
-                                      "бота сперва выберите банк из меню снизу.", reply_markup=markup)
+    bot.send_message(
+        message.chat.id,
+        "Привет, чтобы воспользоваться функционалом "
+        "бота сперва выберите банк из меню снизу.",
+        reply_markup=markup,
+    )
 
 
-@bot.message_handler(func=lambda message: message.text in ('Национальный банк', 'Альфа банк', 'Беларусьбанк'))
+@bot.message_handler(
+    func=lambda message: message.text
+    in ("Национальный банк", "Альфа банк", "Беларусьбанк")
+)
 def choose_bank(message):
     api_data.bank = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
