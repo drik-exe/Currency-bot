@@ -1,5 +1,6 @@
 from config import TOKEN
 from config import APIData
+
 bot = telebot.TeleBot(TOKEN)
 
 api_data = APIData()
@@ -63,7 +64,7 @@ def choose_another_bank(message):
 
 
 @bot.message_handler(func=lambda message: message.text == 'Выбрать другую валюту')
-def choose_another_bank(message):
+def choose_another_currency(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add('USD', 'EUR', 'GBP', 'JPY')
     bot.send_message(message.chat.id, f"Выберите нужную валюту снизу.", reply_markup=markup)
