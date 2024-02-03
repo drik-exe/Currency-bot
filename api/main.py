@@ -96,7 +96,7 @@ async def statistic(currency: str):
 
     for item in response:
         cur_officialrate_list.append(item['Cur_OfficialRate'])
-    return(cur_officialrate_list)
+    return([cur_officialrate_list, one_month_ago_formatted, today_formatted])
 
 
 if __name__ == "__main__":
