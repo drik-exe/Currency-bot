@@ -6,7 +6,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 @app.get("/national_bank/{currency}/{date}")
-async def national_bank(currency: str, date: str) -> float:
+async def national_bank(currency: str, date: str):
     if currency == "USD":
         currency = 431
     elif currency == "EUR":
@@ -30,15 +30,31 @@ async def national_bank(currency: str, date: str) -> float:
         return response["Cur_OfficialRate"]
 
 
-app.get("/belarus_bank/{currency}/{date}")
-async def belarus_bank():
-    request = requests.get("https://belarusbank.by/api/kursExchange")
+from fastapi import FastAPI
+import requests
+
+app = FastAPI()
+
+@app.get("/belarus_bank/{currency}/{date}")
+async def belarus_bank(currency: str, date: str):
+    request = requests.get("https://belarusbank.by/api/kurs_cards")
     response = request.json()
-    print(response)
-    return response
+
+    selected_currency_rate = None
+
+    for entry in response:
+        if entry["kurs_date_time"].startswith(date) and currency.upper() + "CARD_in" in entry:
+            selected_currency_rate = float(entry[f"{currency.upper()}CARD_in"])
+            break
+
+    if selected_currency_rate is not None:
+        return selected_currency_rate
+    else:
+        return {"message": f"No data available for {currency} on {date}"}
 
 
-app.get("/alfabank/{currenct}/{date}")
+
+@app.get("/alfabank/{currenct}/{date}")
 async def alfabank():
     request = requests.get(
         "https://developerhub.alfabank.by:8273/partner/1.0.1/public/nationalRates"
