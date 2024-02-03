@@ -1,11 +1,11 @@
-from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
-
-from config import TOKEN
-from config import APIData
-import requests
-from telebot import types
-import telebot
 import datetime
+
+import requests
+from config import TOKEN, APIData
+from telegram_bot_calendar import LSTEP, DetailedTelegramCalendar
+
+import telebot
+from telebot import types
 
 bot = telebot.TeleBot(TOKEN)
 
