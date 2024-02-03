@@ -3,6 +3,7 @@ import telebot
 from config import TOKEN
 from config import APIData
 
+
 bot = telebot.TeleBot(TOKEN)
 
 api_data = APIData()
