@@ -1,3 +1,5 @@
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
+
 from config import TOKEN
 from config import APIData
 import requests
@@ -103,3 +105,55 @@ def choose_another_currency(message):
     bot.register_next_step_handler(message, choose_currency)
 
 
+
+
+
+
+
+@bot.message_handler(func=lambda message: message.text =='Курс на выбранный день')
+def choose_date_from_calendar(message):
+    bot.send_message(message.chat.id, f"Должен быть календарь")
+    calendar, step = DetailedTelegramCalendar().build()
+    bot.send_message(message.chat.id,
+                     f"Select {LSTEP[step]}",
+                     reply_markup=calendar)
+
+@bot.callback_query_handler(func=DetailedTelegramCalendar.func())
+def cal(c):
+    result, key, step = DetailedTelegramCalendar().process(c.data)
+    if not result and key:
+        bot.edit_message_text(f"Select {LSTEP[step]}",
+                              c.message.chat.id,
+                              c.message.message_id,
+                              reply_markup=key)
+    elif result:
+        api_data.date = result
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        if api_data.bank == 'Альфа банк':
+            markup.add('Курс на текущий день', 'Выбрать другой банк', 'Выбрать другую валюту')
+        else:
+            markup.add(
+                'Курс на текущий день',
+                'Курс на выбранный день',
+                'Собрать статистику',
+                'Выбрать другой банк',
+                'Выбрать другую валюту')
+
+        if api_data.bank == "Национальный банк":
+            data = requests.get(
+                f'http://127.0.0.1:8000/national_bank/{api_data.currency}/{api_data.date}')
+            bot.send_message(c.message.chat.id,
+                             f"{api_data.bank} - {api_data.currency} на {api_data.date}")
+            bot.send_message(c.message.chat.id, f"Курс: {data.json()['exchange']}", reply_markup=markup)
+            print(data.json())
+        elif api_data.bank == 'Беларусьбанк':
+            data = requests.get(
+                f'http://127.0.0.1:8000/belarus_bank/{api_data.currency}/{api_data.date}')
+            bot.send_message(c.message.chat.id,
+                             f"{api_data.bank} - {api_data.currency} на {api_data.date}")
+            if len(data.json()) > 0:
+                bot.send_message(c.message.chat.id, f"Курс продажи: {data.json()[0][api_data.currency + 'CARD_in']}")
+                bot.send_message(c.message.chat.id, f"Курс покупки: {data.json()[0][api_data.currency + 'CARD_out']}",
+                                 reply_markup=markup)
+            else:
+                bot.send_message(c.message.chat.id, f"Нет данных на данный момент", reply_markup=markup)
