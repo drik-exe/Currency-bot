@@ -1,7 +1,8 @@
+from datetime import datetime
+
 import requests
 import uvicorn
 from fastapi import FastAPI
-from datetime import datetime
 
 app = FastAPI()
 
