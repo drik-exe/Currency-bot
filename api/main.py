@@ -1,10 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import calendar
 
 import requests
 import uvicorn
 from fastapi import FastAPI
 
+
 app = FastAPI()
+
 
 @app.get("/national_bank/{currency}/{date}")
 async def national_bank(currency: str, date: str):
@@ -24,12 +27,13 @@ async def national_bank(currency: str, date: str):
             f"https://api.nbrb.by/exrates/rates/{currency}?ondate={date}"
         )
         response = request.json()
-        return {"exchange" : f"{response['Cur_OfficialRate']}"}
+        return {"exchange": f"{response['Cur_OfficialRate']}"}
     elif date == "0":
         request = requests.get(f"https://api.nbrb.by/exrates/rates/{currency}")
         response = request.json()
-        return {"exchange" : f"{response['Cur_OfficialRate']}"}
-    
+        return {"exchange": f"{response['Cur_OfficialRate']}"}
+
+
 @app.get("/belarus_bank/{currency}/{date}")
 async def belarus_bank(currency: str, date: str):
     request = requests.get("https://belarusbank.by/api/kurs_cards")
@@ -38,12 +42,17 @@ async def belarus_bank(currency: str, date: str):
     selected_currency_rates = []
 
     for entry in response:
-        if entry["kurs_date_time"].startswith(date) and currency.upper() + "CARD_in" in entry:
-            selected_currency_rates.append({
-                "kurs_date_time": entry["kurs_date_time"],
-                f"{currency.upper()}CARD_in": entry[f"{currency.upper()}CARD_in"],
-                f"{currency.upper()}CARD_out": entry[f"{currency.upper()}CARD_out"],
-            })
+        if (
+            entry["kurs_date_time"].startswith(date)
+            and currency.upper() + "CARD_in" in entry
+        ):
+            selected_currency_rates.append(
+                {
+                    "kurs_date_time": entry["kurs_date_time"],
+                    f"{currency.upper()}CARD_in": entry[f"{currency.upper()}CARD_in"],
+                    f"{currency.upper()}CARD_out": entry[f"{currency.upper()}CARD_out"],
+                }
+            )
             break
 
     if selected_currency_rates is not None:
@@ -51,21 +60,36 @@ async def belarus_bank(currency: str, date: str):
     else:
         return {"message": f"No data available for {currency} on {date}"}
 
-@app.get("/alfabank/{currency}")
-async def alfabank(currency: str, date: str):
-    date = datetime.strptime(date, "%Y-%m-%d")
 
-    date = date.strftime("%d.%m.%Y")
-    
+@app.get("/alfabank/{currency}")
+async def alfabank(currency: str):
+
     request = requests.get(
         f"https://developerhub.alfabank.by:8273/partner/1.0.1/public/rates"
     )
     response = request.json()
-    
+
     for rate in response["rates"]:
         if rate["sellIso"] == currency and rate["buyIso"] == "BYN":
-            return {"sellRate" : f"{rate['sellRate']}", "buyRate" : f"{rate['buyRate']}"}
-    return {"Error" : "Нету такой валюты"}
+            return {"sellRate": f"{rate['sellRate']}", "buyRate": f"{rate['buyRate']}"}
+    return {"Error": "Нету такой валюты"}
+
+@app.get("/statistic")
+async def statistic():
+    today = datetime.now()
+    one_month_ago = today - timedelta(days=calendar.monthrange(today.year, today.month-1)[1])
+
+    today_formatted = today.strftime("%d-%m-%Y")
+    one_month_ago_formatted = one_month_ago.strftime("%d-%m-%Y")
     
+    print(today_formatted,one_month_ago_formatted)
+    print(f"https://api.nbrb.by/exrates/rates/dynamics/508?startdate={one_month_ago_formatted}&enddate={today_formatted}")
+    
+    request = requests.get(f"https://api.nbrb.by/exrates/rates/dynamics/508?startdate={today_formatted}&enddate={one_month_ago_formatted}")
+    response = request.json()
+    print(response)
+    return(response)
+
+
 if __name__ == "__main__":
     uvicorn.run(app=app, host="0.0.0.0", port=8000)
