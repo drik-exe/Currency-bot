@@ -3,7 +3,7 @@ import datetime
 import requests
 from config import TOKEN, APIData
 from telegram_bot_calendar import LSTEP, DetailedTelegramCalendar
-
+from logger import logger
 import telebot
 from telebot import types
 
@@ -70,7 +70,7 @@ def choose_currency_for_now(message):
     if api_data.bank == 'Альфа банк':
         markup.add('Курс на текущий день', 'Выбрать другой банк', 'Выбрать другую валюту')
         data = requests.get(
-            f'http://127.0.0.1:8000/alfabank/{api_data.currency}/{str(datetime.datetime.now())[:10]}')
+            f'http://127.0.0.1:8000/alfabank/{api_data.currency}/')
         bot.send_message(message.chat.id,
                          f"{api_data.bank} - {api_data.currency} на {str(datetime.datetime.now())[:10]}")
         if len(data.json()) > 0:
@@ -189,4 +189,12 @@ def cal(c):
                                  reply_markup=markup)
             else:
                 bot.send_message(c.message.chat.id, f"Нет данных на данный момент", reply_markup=markup)
+
+
+
+@bot.message_handler(func=lambda message: message.text not in ('USD', 'EUR', 'GBP', 'JPY', 'RUB', 'CNY', 'Национальный банк', 'Альфа банк', 'Беларусбанк'))
+def everything(message):
+    bot.send_message(message.chat.id, f" Что это? "
+                                      f"Следуйте по шагам.")
+    logger.debug(f"don't correct choose. Your choose is {message.text} -CHAT.ID{message.chat.id}")
 
