@@ -1,7 +1,8 @@
 from config import TOKEN
 from config import APIData
 
-
+from telebot import types
+import telebot
 bot = telebot.TeleBot(TOKEN)
 
 api_data = APIData()

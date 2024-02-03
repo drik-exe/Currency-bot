@@ -1,5 +1,3 @@
-from typing import Optional
-
 import requests
 import uvicorn
 from fastapi import FastAPI
