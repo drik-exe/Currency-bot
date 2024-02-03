@@ -74,18 +74,23 @@ async def alfabank(currency: str):
             return {"sellRate": f"{rate['sellRate']}", "buyRate": f"{rate['buyRate']}"}
     return {"Error": "Нету такой валюты"}
 
-@app.get("/statistic")
-async def statistic():
+@app.get("/statistic/{currency}")
+async def statistic(currency: str):
+    if currency == "USD":
+        currency = 431
+    elif currency == "EUR":
+        currency = 451
+    elif currency == "GBP":
+        currency = 429
+    elif currency == "JPY":
+        currency = 508
     today = datetime.now()
     one_month_ago = today - timedelta(days=calendar.monthrange(today.year, today.month-1)[1])
 
     today_formatted = today.strftime("%m-%d-%Y")
     one_month_ago_formatted = one_month_ago.strftime("%m-%d-%Y")
     
-
-    print(f"https://api.nbrb.by/exrates/rates/dynamics/508?startdate={one_month_ago_formatted}&enddate={today_formatted}")
-    
-    request = requests.get(f"https://api.nbrb.by/exrates/rates/dynamics/508?startdate={one_month_ago_formatted}&enddate={today_formatted}")
+    request = requests.get(f"https://api.nbrb.by/exrates/rates/dynamics/{currency}?startdate={one_month_ago_formatted}&enddate={today_formatted}")
     response = request.json()
     cur_officialrate_list = []
 
