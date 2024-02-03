@@ -1,11 +1,8 @@
 from config import TOKEN
-
-import telebot
-from telebot import types
-
+from config import APIData
 bot = telebot.TeleBot(TOKEN)
 
-BANK = ""
+api_data = APIData()
 
 
 @bot.message_handler(commands=["start"])
@@ -26,26 +23,50 @@ def start(message):
     in ("Национальный банк", "Альфа банк", "Беларусьбанк")
 )
 def choose_bank(message):
-    BANK = message.text
+    api_data.bank = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add("USD", "EUR", "GBP", "JPY")
-    bot.send_message(
-        message.chat.id,
-        f"Ты выбрал {message.text}." " Теперь выбери нужную тебе валюту ниже.:",
-        reply_markup=markup,
-    )
+    markup.add('USD', 'EUR', 'GBP', 'JPY')
+    bot.send_message(message.chat.id, f"Ты выбрал {message.text}."
+                                      " Теперь выбери нужную тебе валюту ниже.", reply_markup=markup)
 
 
-@bot.message_handler(func=lambda message: message.text == "Выбрать другую валюту")
+@bot.message_handler(func=lambda message: message.text in ('USD', 'EUR', 'GBP', 'JPY', 'Национальный банк', 'Альфа банк', 'Беларусьбанк'))
 def choose_currency(message):
-    bot.send_message(message.chat.id, "Вы выбрали действие 'Выбрать другую валюту'")
+    if len(message.text) <= 4:
+        api_data.currency = message.text
+    else:
+        api_data.bank = message.text
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    if api_data.bank == 'Альфа банк':
+        markup.add('Курс на текущий день', 'Выбрать другой банк', 'Выбрать другую валюту')
+    else:
+        markup.add(
+            'Курс на текущий день',
+            'Курс на выбранный день',
+            'Собрать статистику',
+            'Выбрать другой банк',
+            'Выбрать другую валюту')
+
+    bot.send_message(message.chat.id, f"Выбранная валюта: {api_data.currency}."
+                                      f"  Выбранный банк: {api_data.bank}.", reply_markup=markup)
 
 
-@bot.message_handler(func=lambda message: message.text == "Курс на текущий день")
-def current_exchange_rate(message):
-    bot.send_message(message.chat.id, "Вы выбрали действие 'Курс на текущий день'")
 
 
-@bot.message_handler(func=lambda message: message.text == "Курс на выбранный день")
-def custom_exchange_rate(message):
-    bot.send_message(message.chat.id, "Вы выбрали действие 'Курс на выбранный день'")
+
+@bot.message_handler(func=lambda message: message.text == 'Выбрать другой банк')
+def choose_another_bank(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add('Национальный банк', 'Альфа банк', 'Беларусьбанк')
+    bot.send_message(message.chat.id, f"Выберите банк из меню снизу.", reply_markup=markup)
+    bot.register_next_step_handler(message, choose_currency)
+
+
+@bot.message_handler(func=lambda message: message.text == 'Выбрать другую валюту')
+def choose_another_bank(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add('USD', 'EUR', 'GBP', 'JPY')
+    bot.send_message(message.chat.id, f"Выберите нужную валюту снизу.", reply_markup=markup)
+    bot.register_next_step_handler(message, choose_currency)
+
+
