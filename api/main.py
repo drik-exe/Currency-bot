@@ -1,10 +1,9 @@
-from typing import Optional
-
 import requests
 import uvicorn
 from fastapi import FastAPI
 
 app = FastAPI()
+
 @app.get("/national_bank/{currency}/{date}")
 async def national_bank(currency: str, date: str):
     if currency == "USD":
@@ -40,27 +39,30 @@ async def belarus_bank(currency: str, date: str):
     request = requests.get("https://belarusbank.by/api/kurs_cards")
     response = request.json()
 
-    selected_currency_rate = None
+    selected_currency_rates = []
 
     for entry in response:
         if entry["kurs_date_time"].startswith(date) and currency.upper() + "CARD_in" in entry:
-            selected_currency_rate = float(entry[f"{currency.upper()}CARD_in"])
+            selected_currency_rates.append({
+                "kurs_date_time": entry["kurs_date_time"],
+                f"{currency.upper()}CARD_in": entry[f"{currency.upper()}CARD_in"],
+                f"{currency.upper()}CARD_out": entry[f"{currency.upper()}CARD_out"],
+            })
             break
 
-    if selected_currency_rate is not None:
-        return selected_currency_rate
+    if selected_currency_rates is not None:
+        return selected_currency_rates
     else:
         return {"message": f"No data available for {currency} on {date}"}
 
 
 
-@app.get("/alfabank/{currenct}/{date}")
+@app.get("/alfabank/{currency}/{date}")
 async def alfabank(currency: str, date: str):
     request = requests.get(
         "https://developerhub.alfabank.by:8273/partner/1.0.1/public/nationalRates"
     )
-    response = request.json
-    print(response)
+    response = request.json()
     return response
     
 
