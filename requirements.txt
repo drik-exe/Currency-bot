@@ -5,3 +5,5 @@ uvicorn==0.25.0
 python-telegram-bot-calendar==1.0.5
 black==24.1.1
 isort==5.13.2
+python-dotenv==1.0.1
+matplotlib~=3.8.2

@@ -1,4 +1,10 @@
-TOKEN = "6710613573:AAGS9ZzE_eO7eB5PEI4gMaZihaza4WSmsrI"
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+TOKEN = os.getenv("BOT_API")
 
 
 class APIData:

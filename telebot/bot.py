@@ -27,7 +27,7 @@ def start(message):
 
 @bot.message_handler(
     func=lambda message: message.text
-    in ("Национальный банк", "Альфа банк", "Беларусбанк")
+                         in ("Национальный банк", "Альфа банк", "Беларусбанк")
 )
 def choose_bank(message):
     api_data.bank = message.text
@@ -40,12 +40,12 @@ def choose_bank(message):
         markup.add('USD', 'EUR', 'GBP', 'JPY')
 
     bot.send_message(message.chat.id, f"Ты выбрал {message.text}."
-                                          " Теперь выбери нужную тебе валюту ниже.", reply_markup=markup)
+                                      " Теперь выбери нужную тебе валюту ниже.", reply_markup=markup)
 
 
-@bot.message_handler(func=lambda message: message.text in ('USD', 'EUR', 'GBP', 'JPY', 'RUB', 'CNY', 'Национальный банк', 'Альфа банк', 'Беларусбанк'))
+@bot.message_handler(func=lambda message: message.text in (
+        'USD', 'EUR', 'GBP', 'JPY', 'RUB', 'CNY', 'Национальный банк', 'Альфа банк', 'Беларусбанк'))
 def choose_currency(message):
-    print(message.text)
     if len(message.text) <= 4:
         api_data.currency = message.text
     else:
@@ -94,26 +94,34 @@ def choose_currency_for_now(message):
         bot.send_message(message.chat.id,
                          f"{api_data.bank} - {api_data.currency} на {str(datetime.datetime.now())[:10]}")
         if len(data.json()) > 0:
-            print(data.json())
-            bot.send_message(
-                message.chat.id, f"Курс продажи: {data.json()['sellRate']}"
-            )
-            bot.send_message(
-                message.chat.id,
-                f"Курс покупки: {data.json()['buyRate']}",
-                reply_markup=markup,
-            )
+            try:
+                data.json()['sellRate']
+            except:
+                bot.send_message(
+                    message.chat.id,
+                    f"Нет такой валюты",
+                    reply_markup=markup,
+                )
+            else:
+                bot.send_message(
+                    message.chat.id, f"Курс продажи: {data.json()['sellRate']}"
+                )
+                bot.send_message(
+                    message.chat.id,
+                    f"Курс покупки: {data.json()['buyRate']}",
+                    reply_markup=markup,
+                )
         else:
             bot.send_message(
                 message.chat.id, f"Нет данных на данный момент", reply_markup=markup
             )
     elif api_data.bank == "Беларуcбанк":
         markup.add(
-                "Курс на текущий день",
-                "Курс на выбранный день",
-                "Выбрать другой банк",
-                "Выбрать другую валюту",
-            )
+            "Курс на текущий день",
+            "Курс на выбранный день",
+            "Выбрать другой банк",
+            "Выбрать другую валюту",
+        )
     else:
         markup.add(
             "Курс на текущий день",
@@ -124,15 +132,16 @@ def choose_currency_for_now(message):
         )
 
     if api_data.bank == "Национальный банк":
-        data = requests.get(f'http://127.0.0.1:8000/national_bank/{api_data.currency}/{str(datetime.datetime.now())[:10]}')
-        bot.send_message(message.chat.id, f"{api_data.bank} - {api_data.currency} на {str(datetime.datetime.now())[:10]}")
+        data = requests.get(
+            f'http://127.0.0.1:8000/national_bank/{api_data.currency}/{str(datetime.datetime.now())[:10]}')
+        bot.send_message(message.chat.id,
+                         f"{api_data.bank} - {api_data.currency} на {str(datetime.datetime.now())[:10]}")
 
         if api_data.currency not in ('USD', 'EUR', 'GBP', 'JPY'):
             bot.send_message(message.chat.id, f"Нет такой валюты", reply_markup=markup)
         else:
             bot.send_message(message.chat.id, f"Курс: {data.json()['exchange']}", reply_markup=markup)
 
-        print(data.json())
     elif api_data.bank == 'Беларусбанк':
         data = requests.get(
             f'http://127.0.0.1:8000/belarus_bank/{api_data.currency}/{str(datetime.datetime.now())[:10]}')
@@ -142,7 +151,8 @@ def choose_currency_for_now(message):
             bot.send_message(message.chat.id, f"Нет такой валюты", reply_markup=markup)
         elif len(data.json()) > 0:
             bot.send_message(message.chat.id, f"Курс продажи: {data.json()[0][api_data.currency + 'CARD_in']}")
-            bot.send_message(message.chat.id, f"Курс покупки: {data.json()[0][api_data.currency + 'CARD_out']}", reply_markup=markup)
+            bot.send_message(message.chat.id, f"Курс покупки: {data.json()[0][api_data.currency + 'CARD_out']}",
+                             reply_markup=markup)
         else:
             bot.send_message(
                 message.chat.id, f"Нет данных на данный момент", reply_markup=markup
@@ -194,19 +204,19 @@ def cal(c):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         if api_data.bank == "Беларуcбанк":
             markup.add(
-            "Курс на текущий день",
-            "Курс на выбранный день",
-            "Выбрать другой банк",
-            "Выбрать другую валюту",
-        )
+                "Курс на текущий день",
+                "Курс на выбранный день",
+                "Выбрать другой банк",
+                "Выбрать другую валюту",
+            )
         else:
             markup.add(
-            "Курс на текущий день",
-            "Курс на выбранный день",
-            "Собрать статистику",
-            "Выбрать другой банк",
-            "Выбрать другую валюту",
-        )
+                "Курс на текущий день",
+                "Курс на выбранный день",
+                "Собрать статистику",
+                "Выбрать другой банк",
+                "Выбрать другую валюту",
+            )
 
         if api_data.bank == "Национальный банк":
             data = requests.get(
@@ -217,7 +227,6 @@ def cal(c):
                 bot.send_message(c.message.chat.id, f"Нет такой валюты", reply_markup=markup)
             else:
                 bot.send_message(c.message.chat.id, f"Курс: {data.json()['exchange']}", reply_markup=markup)
-            print(data.json())
         elif api_data.bank == 'Беларусбанк':
             data = requests.get(
                 f'http://127.0.0.1:8000/belarus_bank/{api_data.currency}/{api_data.date}')
@@ -244,28 +253,21 @@ def choose_data(message):
         'Выбрать другой банк',
         'Выбрать другую валюту')
     data = requests.get(
-                f'http://127.0.0.1:8000/statistic/{api_data.currency}')
-    print(data.json())
+        f'http://127.0.0.1:8000/statistic/{api_data.currency}')
     plt.plot([i for i in range(1, 33)], data.json()['cur_officialrate_list'], color='purple', marker='o', markersize=7)
     plt.xlabel('Дни')
     plt.ylabel(f'Курс {api_data.currency}')
     plt.title(f'Статистика за последние 30 дней')
 
     plt.savefig("foo.png")
-    photo = open('foo.png', 'rb')
+    photo = open(f'{message.chat.id}.png', 'rb')
     bot.send_photo(message.chat.id, photo, reply_markup=markup)
     bot.register_next_step_handler(message, choose_currency_for_now)
 
 
-# @bot.message_handler(func=lambda message: message.text not in ('Национальный банк', 'Альфа банк', 'Беларусбанк'))
-# def everything(message):
-#     if api_data.bank is None:
-#         bot.register_next_step_handler(message, choose_bank)
-
-
-@bot.message_handler(func=lambda message: message.text not in ('USD', 'EUR', 'GBP', 'JPY', 'RUB', 'CNY', 'Национальный банк', 'Альфа банк', 'Беларусбанк'))
+@bot.message_handler(func=lambda message: message.text not in (
+        'USD', 'EUR', 'GBP', 'JPY', 'RUB', 'CNY', 'Национальный банк', 'Альфа банк', 'Беларусбанк'))
 def everything(message):
     bot.send_message(message.chat.id, f" Что это? "
                                       f"Следуйте по шагам.")
     logger.debug(f"don't correct choose. Your choose is {message.text} -CHAT.ID{message.chat.id}")
-
